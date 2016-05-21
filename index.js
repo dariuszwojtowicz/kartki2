@@ -77,6 +77,7 @@ server.route({
     path: '/register',
     config: {
         handler: function(request, reply) {
+            console.log('Registration');
             var user = request.payload,
                 user_id;
                 
