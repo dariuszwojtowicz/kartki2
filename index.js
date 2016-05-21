@@ -58,10 +58,12 @@ server.route({
                                     data[0]['isAuthenticated'] = 1;
                                     reply(data[0]).code(200);                                            
                                 } else {
+                                    conn.end();
                                     reply().header('api-message', 'Invalid login/password combination').code(401);
                                 }
                             })
                             .error(function(e) {
+                                conn.end();
                                 reply().header('api-message', 'Database request error on user login:' + e).code(400);
                             });
                         }
@@ -244,9 +246,11 @@ server.route({
                         where: "ul.id = " + user_id
                     }, conn)
                     .then(function(data) {
+                        conn.end();
                         reply(data).code(200);
                     })
                     .error(function(e) {
+                        conn.end();
                         reply().header('api-message', 'Database request error on user login:' + e).code(400);
                     });
                 }
@@ -280,9 +284,11 @@ server.route({
                                 data[i].count = 1;
                             }
                         }
+                        conn.end();
                         reply(data).code(200);
                     })
                     .error(function(e) {
+                        conn.end();
                         reply().header('api-message', 'Database request error on user login:' + e).code(400);
                     });
                 }
@@ -334,9 +340,11 @@ server.route({
                     store.custom_query(
                         'select login, id from users' + where, conn)
                     .then(function(data) {
+                        conn.end();
                         reply(data).code(200);
                     })
                     .error(function(e) {
+                        conn.end();
                         reply().header('api-message', 'Database request error on user login:' + e).code(400);
                     });
                 }
@@ -365,9 +373,11 @@ server.route({
                         order_by: "id desc",
                     }, conn)
                     .then(function(data) {
+                        conn.end();
                         reply(data).code(200);
                     })
                     .error(function(e) {
+                        conn.end();
                         reply().header('api-message', 'Database request error on user login:' + e).code(400);
                     });
                 }
@@ -414,6 +424,7 @@ server.route({
              
             Joi.validate(parameters, schema, function (err, value) {
                 if (err) {
+                    conn.end();
                     reply(err.details[0].message).header('validation-error', err.details[0].message).code(400);
                 } else {
                     conn.connect(function(err) {
