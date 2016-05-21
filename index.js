@@ -295,7 +295,23 @@ server.route({
     path: '/rank',
     config: {
         handler: function(request, reply) {
-            reply({"message" : "Jedziemy"}).code(200);
+            connect = mysql.createConnection(config.db);
+
+            connect.connect(function(err) {
+                if (err) {
+                    console.error('Błąd połączenia MySQL: ' + err.stack);
+                    return;
+                }
+            });
+    
+            connect.on('error', function(err) {
+                console.log('Błąd połączenia z bazą MySQL', err);
+                if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+                    this.start();
+                } else {
+                    throw err;
+                }
+            });
         }
     }
 });
