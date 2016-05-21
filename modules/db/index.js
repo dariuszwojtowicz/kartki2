@@ -4,6 +4,7 @@ var mysql = require("mysql"),
 module.exports = new function() {
     var connect = null,
         config = require("../../config.js");
+        that = this;
 
     var start = function() {
         connect = mysql.createConnection(config.db);
@@ -20,7 +21,7 @@ module.exports = new function() {
         connect.on('error', function(err) {
             console.log('Błąd połączenia z bazą MySQL', err);
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                this.start();
+                that.start();
             } else {
                 throw err;
             }
