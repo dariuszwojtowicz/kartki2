@@ -12,6 +12,8 @@ module.exports = new function() {
             if (err) {
                 console.error('Błąd połączenia MySQL: ' + err.stack);
                 return;
+            } else {
+                console.log('Połączono z bazą danych');
             }
         });
 
