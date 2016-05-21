@@ -1,0 +1,30 @@
+{
+  "name": "karteczki",
+  "version": "1.0.0",
+  "description": "Game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "mobile",
+    "fun"
+  ],
+  "author": "Team Karteczki TSI",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "crypto": "0.0.3",
+    "hapi": "^13.3.0",
+    "inert": "^3.2.1",
+    "joi": "^8.0.5",
+    "mysql": "^2.10.2",
+    "pusher": "^1.2.1"
+  },
+  "engines": {
+    "node": "4.1.2",
+    "npm": "3.8.5"
+  }
+}
