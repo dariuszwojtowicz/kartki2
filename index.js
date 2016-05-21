@@ -295,29 +295,7 @@ server.route({
     path: '/rank',
     config: {
         handler: function(request, reply) {
-            var conn = store.connection();
-            var user_id = request.query.user_id;
-
-            conn.connect(function(err) {
-                if (err) {
-                    conn.end();
-                    reply().header('api-message', 'Problem with database connection before request').code(500);
-                } else {
-                    store.custom_query(
-                        'select serial, login, rank, user_id from (' +
-                            'select @serial:= @serial+1 as serial, login, rank, id as user_id ' +
-                            'from (select login, rank, id from users order by rank desc) as users, ' +
-                                 '(select @serial:= 0) as serial' +
-                        ') as results ' + 
-                        'where serial < 11 or user_id = ' + user_id, conn)
-                    .then(function(data) {
-                        reply(data).code(200);
-                    })
-                    .error(function(e) {
-                        reply().header('api-message', 'Database request error on user login:' + e).code(400);
-                    });
-                }
-            });
+            reply({"message" : "Jedziemy"}).code(200);
         }
     }
 });
