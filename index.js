@@ -243,7 +243,7 @@ server.route({
                     "LEFT JOIN `cardSets` cs ON ul.cardSetId = cs.id",
                     {
                         select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id) as numberOfUserCards"],
-                        where: "ul.id = " + user_id
+                        where: "ul.userId = " + user_id
                     }, conn)
                     .then(function(data) {
                         conn.end();
