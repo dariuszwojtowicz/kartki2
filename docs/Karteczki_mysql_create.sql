@@ -5,7 +5,6 @@ CREATE TABLE `users` (
 	`id` int NOT NULL AUTO_INCREMENT,
 	`login` varchar(100) NOT NULL UNIQUE,
 	`password` varchar(1000) NOT NULL,
-	`email` varchar(100) NOT NULL UNIQUE,
 	`rank` int NOT NULL,
 	PRIMARY KEY (`id`)
 );

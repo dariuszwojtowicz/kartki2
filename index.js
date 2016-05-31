@@ -49,7 +49,7 @@ server.route({
                             reply().header('api-message', 'Problem with database connection before request').code(500);
                         } else {
                             store.get("`users`", {
-                                select: ["id", "login", "email"],
+                                select: ["id", "login"],
                                 where: "login ='" + user.login + "' AND password='" + crypto.encrypt(encodeURIComponent(user.password)) + "'"
                             }, conn)
                             .then(function(data) {                                    
@@ -87,7 +87,6 @@ server.route({
                 login: Joi.string().min(3).max(30).required(),
                 password: Joi.string().min(3).max(20).required(),
                 passwordRepeat: Joi.string().min(3).max(20).required(),
-                email: Joi.string().email().required()
             });
              
             Joi.validate(user, schema, function (err, value) {
@@ -109,7 +108,7 @@ server.route({
                                 }
                                 store.get("`users`", {
                                     select: ["id"],
-                                    where: "login ='" + user.login + "' OR email='" + user.email + "'"
+                                    where: "login ='" + user.login + "'"
                                 }, conn)
                                 .then(function(data) {
                                     if (data[0]) {
@@ -120,7 +119,6 @@ server.route({
                                             values: {
                                                 login: encodeURIComponent(user.login),
                                                 password: crypto.encrypt(encodeURIComponent(user.password)),
-                                                email: user.email,
                                                 rank: '2'
                                             }, 
                                         }, conn)
@@ -243,7 +241,8 @@ server.route({
                     "LEFT JOIN `cardSets` cs ON ul.cardSetId = cs.id",
                     {
                         select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id) as numberOfUserCards"],
-                        where: "ul.userId = " + user_id
+                        where: "ul.userId = " + user_id,
+                        order_by: 'ul.number ASC'
                     }, conn)
                     .then(function(data) {
                         conn.end();
@@ -302,21 +301,28 @@ server.route({
     path: '/rank',
     config: {
         handler: function(request, reply) {
-            connect = mysql.createConnection(config.db);
+            var conn = store.connection();
+            var user_id = request.query.user_id;
 
-            connect.connect(function(err) {
+            conn.connect(function(err) {
                 if (err) {
-                    console.error('Błąd połączenia MySQL: ' + err.stack);
-                    return;
-                }
-            });
-    
-            connect.on('error', function(err) {
-                console.log('Błąd połączenia z bazą MySQL', err);
-                if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                    this.start();
+                    conn.end();
+                    reply().header('api-message', 'Problem with database connection before request').code(500);
                 } else {
-                    throw err;
+                    store.custom_query(
+                        'select serial, login, rank, user_id from (' +
+                            'select @serial:= @serial+1 as serial, login, rank, id as user_id ' +
+                            'from (select login, rank, id from users order by rank desc) as users, ' +
+                                 '(select @serial:= 0) as serial' +
+                        ') as results ' + 
+                        'where serial < 11 or user_id = ' + user_id, conn)
+                    .then(function(data) {
+                        data.sort(function(a,b) {return (a.rank < b.rank) ? 1 : ((a.rank < b.rank) ? -1 : 0);} ); 
+                        reply(data).code(200);
+                    })
+                    .error(function(e) {
+                        reply().header('api-message', 'Database request error on user login:' + e).code(400);
+                    });
                 }
             });
         }
