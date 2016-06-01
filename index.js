@@ -240,12 +240,13 @@ server.route({
                     store.get("`userLevels` ul " + 
                     "LEFT JOIN `cardSets` cs ON ul.cardSetId = cs.id",
                     {
-                        select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id) as numberOfUserCards"],
+                        select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id AND count > 0) as numberOfUserCards"],
                         where: "ul.userId = " + user_id,
                         order_by: 'ul.number ASC'
                     }, conn)
                     .then(function(data) {
                         conn.end();
+						data.cardsLeft = data.numberOfLevelCards - data.numberOfUserCards;
                         reply(data).code(200);
                     })
                     .error(function(e) {
