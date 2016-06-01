@@ -246,7 +246,9 @@ server.route({
                     }, conn)
                     .then(function(data) {
                         conn.end();
-						data.cardsLeft = data.numberOfLevelCards - data.numberOfUserCards;
+						for (var i = 0; i < data.length; i++) {
+							data[i].cardsLeft = data[i].numberOfLevelCards - data[i].numberOfUserCards;
+						}						
                         reply(data).code(200);
                     })
                     .error(function(e) {
