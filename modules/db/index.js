@@ -21,7 +21,7 @@ module.exports = new function() {
         connect.on('error', function(err) {
             console.log('Błąd połączenia z bazą MySQL', err);
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                that.start();
+                start();
             } else {
                 throw err;
             }
