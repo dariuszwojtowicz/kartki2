@@ -49,7 +49,7 @@ server.route({
                             reply().header('api-message', 'Problem with database connection before request').code(500);
                         } else {
                             store.get("`users`", {
-                                select: ["id", "login"],
+                                select: ["id", "login", "rank"],
                                 where: "login ='" + user.login + "' AND password='" + crypto.encrypt(encodeURIComponent(user.password)) + "'"
                             }, conn)
                             .then(function(data) {                                    
@@ -260,6 +260,40 @@ server.route({
 
 server.route({
     method: ['GET'],
+    path: '/users/{id}/clipboard',
+    config: {
+        handler: function(request, reply) {
+            var conn = store.connection();
+            var user_id = request.params.id;
+
+            conn.connect(function(err) {
+                if (err) {
+                    conn.end();
+                    reply().header('api-message', 'Problem with database connection before request').code(500);
+                } else {
+                    store.get("`userLevels` ul " +
+                              "JOIN `levelcards` lc ON lc.userLevelId = ul.id " +
+                              "JOIN cards c ON c.id = lc.cardId",
+                    {
+                        select: ["cardId", "count", "imagePath", "ul.id as clipboardId"],
+                        where: "ul.userId = " + user_id + " AND ul.number = 0"
+                    }, conn)
+                    .then(function(data) {
+                        conn.end();
+                        reply(data).code(200);
+                    })
+                    .error(function(e) {
+                        conn.end();
+                        reply().header('api-message', 'Database request error on user login:' + e).code(400);
+                    });
+                }
+            });
+        }
+    }
+});
+
+server.route({
+    method: ['GET'],
     path: '/levels/{id}/cards',
     config: {
         handler: function(request, reply) {
@@ -344,7 +378,7 @@ server.route({
                     reply().header('api-message', 'Problem with database connection before request').code(500);
                 } else {
                     store.custom_query(
-                        'select login, id from users' + where, conn)
+                        'select login, id, rank from users' + where, conn)
                     .then(function(data) {
                         conn.end();
                         reply(data).code(200);
