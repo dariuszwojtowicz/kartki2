@@ -240,12 +240,15 @@ server.route({
                     store.get("`userLevels` ul " + 
                     "LEFT JOIN `cardSets` cs ON ul.cardSetId = cs.id",
                     {
-                        select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id) as numberOfUserCards"],
+                        select: ["ul.id", "ul.isFinished", "cs.name", "cs.description", "cs.numberOfCards as numberOfLevelCards", "(select count(*) from levelCards where userLevelId = ul.id AND count > 0) as numberOfUserCards"],
                         where: "ul.userId = " + user_id,
                         order_by: 'ul.number ASC'
                     }, conn)
                     .then(function(data) {
                         conn.end();
+						for (var i = 0; i < data.length; i++) {
+							data[i].cardsLeft = data[i].numberOfLevelCards - data[i].numberOfUserCards;
+						}						
                         reply(data).code(200);
                     })
                     .error(function(e) {
@@ -549,13 +552,13 @@ server.route({
                                                                                                     if (closed_conn_counter == 3) {
                                                                                                         server.app.pusher_obj.trigger('global', 'card-received',
                                                                                                         {
-                                                                                                            "user_id" : toUserId,
+                                                                                                            "userId" : toUserId,
                                                                                                             "message": "Kartka od " + fromUserLogin + " trafiła do poziomu " + number + "." 
                                                                                                         });
                                                                                                         setTimeout(function() {
                                                                                                             server.app.pusher_obj.trigger('global', 'level-finished',
                                                                                                             {
-                                                                                                                "user_id" : toUserId,
+                                                                                                                "userId" : toUserId,
                                                                                                                 "message": "Level " + number + " został ukończony!" 
                                                                                                             });
                                                                                                         }, 3000);
@@ -615,13 +618,13 @@ server.route({
                                                                                                     if (closed_conn_counter == 3) {
                                                                                                         server.app.pusher_obj.trigger('global', 'card-received',
                                                                                                         {
-                                                                                                            "user_id" : toUserId,
+                                                                                                            "userId" : toUserId,
                                                                                                             "message": "Kartka od " + fromUserLogin + " trafiła do poziomu " + number + "." 
                                                                                                         });
                                                                                                         setTimeout(function() {
                                                                                                             server.app.pusher_obj.trigger('global', 'level-finished',
                                                                                                             {
-                                                                                                                "user_id" : toUserId,
+                                                                                                                "userId" : toUserId,
                                                                                                                 "message": "Level " + number + " został ukończony!" 
                                                                                                             });
                                                                                                         }, 3000);
@@ -713,13 +716,13 @@ server.route({
                                                                                                         if (closed_conn_counter == 3) {
                                                                                                             server.app.pusher_obj.trigger('global', 'card-received',
                                                                                                             {
-                                                                                                                "user_id" : toUserId,
+                                                                                                                "userId" : toUserId,
                                                                                                                 "message": "Kartka od " + fromUserLogin + " trafiła do poziomu " + number + "." 
                                                                                                             });
                                                                                                             setTimeout(function() {
                                                                                                                 server.app.pusher_obj.trigger('global', 'level-finished',
                                                                                                                 {
-                                                                                                                    "user_id" : toUserId,
+                                                                                                                    "userId" : toUserId,
                                                                                                                     "message": "Level " + number + " został ukończony!" 
                                                                                                                 });
                                                                                                             }, 3000);
@@ -777,7 +780,7 @@ server.route({
                                                                     if (closed_conn_counter == 2) {
                                                                         server.app.pusher_obj.trigger('global', 'card-received',
                                                                         {
-                                                                            "user_id" : toUserId,
+                                                                            "userId" : toUserId,
                                                                             "message": "Kartka od " + fromUserLogin + " trafiła do poziomu " + number + "." 
                                                                         });
                                                                         var conn8 = store.connection();
@@ -836,7 +839,7 @@ server.route({
                                                                 if (closed_conn_counter == 2) {
                                                                     server.app.pusher_obj.trigger('global', 'card-received',
                                                                     {
-                                                                        "user_id" : toUserId,
+                                                                        "userId" : toUserId,
                                                                         "message": "Kartka od " + fromUserLogin + " trafiła do schowka." 
                                                                     });
                                                                     var conn7 = store.connection();
@@ -884,7 +887,7 @@ server.route({
                                                                 if (closed_conn_counter == 2) {
                                                                     server.app.pusher_obj.trigger('global', 'card-received',
                                                                     {
-                                                                        "user_id" : toUserId,
+                                                                        "userId" : toUserId,
                                                                         "message": "Kartka od " + fromUserLogin + " trafiła do schowka." 
                                                                     });
                                                                     var conn6 = store.connection();
@@ -944,14 +947,14 @@ server.route({
                                                                 var received_message = in_store ? "Kartka od " + fromUserLogin + " trafiła do schowka." : "Kartka od " + fromUserLogin + " trafiła do poziomu " + number + "."; 
                                                                 server.app.pusher_obj.trigger('global', 'card-received',
                                                                 {
-                                                                    "user_id" : toUserId,
+                                                                    "userId" : toUserId,
                                                                     "message": received_message
                                                                 });
                                                                 if (level_finished) {
                                                                     setTimeout(function() {
                                                                         server.app.pusher_obj.trigger('global', 'level-finished',
                                                                         {
-                                                                            "user_id" : toUserId,
+                                                                            "userId" : toUserId,
                                                                             "message": "Level " + number + " został ukończony!" 
                                                                         });
                                                                     }, 3000);
